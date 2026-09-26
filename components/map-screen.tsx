@@ -5,9 +5,7 @@ import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
 import { useApp } from '@/components/app-provider'
-import { EventSheet } from '@/components/event-sheet'
 import { GatheringList } from '@/components/gathering-list'
-import { ProfileDialog } from '@/components/profile-dialog'
 import { Badge } from '@/components/ui/badge'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { CATEGORY_LABELS } from '@/lib/data'
@@ -26,8 +24,8 @@ type Audience = 'friends' | 'public'
 type Layout = 'map' | 'list'
 
 export function MapScreen() {
-  const { events, selectedEventId, selectEvent, getUser, currentUser, friendIds } = useApp()
-  const [profileUserId, setProfileUserId] = useState<string | null>(null)
+  const { events, selectedEventId, selectEvent, getUser, currentUser, friendIds, view } =
+    useApp()
   const [audience, setAudience] = useState<Audience>('friends')
   const [layout, setLayout] = useState<Layout>('map')
 
@@ -46,18 +44,15 @@ export function MapScreen() {
     return hosts.size
   }, [visibleEvents, currentUser.id, friendIds])
 
-  const selectedEvent = useMemo(
-    () => events.find((e) => e.id === selectedEventId) ?? null,
-    [events, selectedEventId],
-  )
-
   return (
     <div className="relative h-full w-full overflow-hidden">
       {/* The map stays mounted under the list so switching back is instant. */}
       <div className="absolute inset-0">
         <MapLibreMap
           events={visibleEvents}
-          selectedEventId={selectedEventId}
+          // Only follow selections while the map is on screen, so opening a
+          // gathering from another tab doesn't move the camera behind it.
+          selectedEventId={view === 'map' ? selectedEventId : null}
           onSelect={selectEvent}
           getUser={getUser}
           friendIds={friendIds}
@@ -148,7 +143,7 @@ export function MapScreen() {
       ) : null}
 
       {/* Bottom event carousel (map view only) */}
-      {layout === 'map' && !selectedEvent ? (
+      {layout === 'map' && !selectedEventId ? (
         <div className="absolute inset-x-0 bottom-(--nav-clearance) z-10">
           <div className="flex gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {visibleEvents.map((evt) => (
@@ -157,13 +152,6 @@ export function MapScreen() {
           </div>
         </div>
       ) : null}
-
-      <EventSheet
-        event={selectedEvent}
-        onClose={() => selectEvent(null)}
-        onViewProfile={setProfileUserId}
-      />
-      <ProfileDialog userId={profileUserId} onClose={() => setProfileUserId(null)} />
     </div>
   )
 }

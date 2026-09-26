@@ -48,6 +48,11 @@ type AppState = {
   selectedEventId: string | null
   selectEvent: (id: string | null) => void
   registerForEvent: (id: string) => void
+  /** Undo a join, including the friendship time it granted */
+  leaveEvent: (id: string) => void
+  /** ids of gatherings you've reported */
+  reportedIds: Set<string>
+  reportEvent: (id: string) => void
   createEvent: (input: NewEventInput) => AppEvent
   isRegistered: (id: string) => boolean
   getUser: (id: string) => User | undefined
@@ -72,6 +77,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [createdCount, setCreatedCount] = useState(0)
   const [requestedIds, setRequestedIds] = useState<Set<string>>(() => new Set())
+  const [reportedIds, setReportedIds] = useState<Set<string>>(() => new Set())
 
   const friendIds = useMemo(
     () => new Set(friendships.map((f) => f.friendId)),
@@ -117,6 +123,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
+  const leaveEvent = useCallback((id: string) => {
+    setEvents((prev) => {
+      const evt = prev.find((e) => e.id === id)
+      if (!evt || !evt.attendeeIds.includes(CURRENT_USER_ID)) return prev
+      // Mirror registerForEvent: take back the time granted with co-attendees.
+      const coAttendees = evt.attendeeIds.filter((a) => a !== CURRENT_USER_ID)
+      setFriendships((fs) =>
+        fs.map((f) =>
+          coAttendees.includes(f.friendId)
+            ? {
+                ...f,
+                sharedMinutes: Math.max(0, f.sharedMinutes - evt.durationMinutes),
+                sharedEvents: Math.max(0, f.sharedEvents - 1),
+              }
+            : f,
+        ),
+      )
+      return prev.map((e) =>
+        e.id === id
+          ? { ...e, attendeeIds: e.attendeeIds.filter((a) => a !== CURRENT_USER_ID) }
+          : e,
+      )
+    })
+  }, [])
+
+  const reportEvent = useCallback((id: string) => {
+    setReportedIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)))
+  }, [])
+
   const createEvent = useCallback(
     (input: NewEventInput) => {
       const pos = scatterAround(createdCount + 2)
@@ -152,6 +187,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       selectedEventId,
       selectEvent,
       registerForEvent,
+      leaveEvent,
+      reportedIds,
+      reportEvent,
       createEvent,
       isRegistered,
       getUser,
@@ -167,6 +205,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       selectedEventId,
       selectEvent,
       registerForEvent,
+      leaveEvent,
+      reportedIds,
+      reportEvent,
       createEvent,
       isRegistered,
       getUser,

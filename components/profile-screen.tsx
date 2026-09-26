@@ -8,7 +8,7 @@ import { CATEGORY_LABELS } from '@/lib/data'
 import { formatHours } from './friendship'
 
 export function ProfileScreen() {
-  const { currentUser, events, friendships, selectEvent, setView } = useApp()
+  const { currentUser, events, friendships, selectEvent } = useApp()
 
   const hosting = events.filter((e) => e.hostId === currentUser.id)
   const joined = events.filter(
@@ -76,10 +76,7 @@ export function ProfileScreen() {
           {mine.map((e) => (
             <button
               key={e.id}
-              onClick={() => {
-                selectEvent(e.id)
-                setView('map')
-              }}
+              onClick={() => selectEvent(e.id)}
               className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-3 text-left transition active:scale-[0.99]"
             >
               <div className="min-w-0">
