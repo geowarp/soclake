@@ -26,7 +26,7 @@ export function ProfileScreen() {
   const mine = [...hosting, ...joined]
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto">
+    <div className="flex h-full flex-col overflow-y-auto pb-(--nav-clearance)">
       <div className="relative h-28 shrink-0 bg-gradient-to-br from-primary/40 via-accent/20 to-transparent">
         <div className="absolute -bottom-10 left-4">
           <Avatar className="size-24 border-4 border-background shadow-xl">

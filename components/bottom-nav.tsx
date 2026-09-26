@@ -1,96 +1,98 @@
 'use client'
 
-import { Map, Plus, Sparkles, User, Users } from 'lucide-react'
-import { useApp } from '@/components/app-provider'
+import { MapIcon, Sparkles, User, Users, type LucideIcon } from 'lucide-react'
+import { useApp, type View } from '@/components/app-provider'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+
+// Slot order in the island; the indicator slides by slot index.
+const SLOTS: View[] = ['map', 'friends', 'create', 'profile']
 
 export function BottomNav() {
   const { view, setView, selectEvent } = useApp()
+  const onOrbit = view === 'create'
 
   return (
-    <nav className="relative z-[1300] shrink-0 border-t border-border/60 bg-card/90 backdrop-blur-md">
-      <div className="mx-auto grid max-w-md grid-cols-4 items-center px-2 py-2">
-        <NavButton
+    <nav
+      aria-label="Primary"
+      className={cn(
+        'pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-(--nav-inset)',
+        // Scroll-edge fade where lists meet the island; the map stays unobstructed.
+        view !== 'map' && 'bg-linear-to-t from-background via-background/60 to-transparent pt-8',
+      )}
+    >
+      <div className="glass-island pointer-events-auto relative flex h-(--nav-island-h) items-center rounded-full p-1.5">
+        <span
+          aria-hidden
+          className={cn(
+            'nav-indicator absolute inset-y-1.5 left-1.5 w-16 rounded-full bg-foreground/10',
+            onOrbit && 'opacity-0',
+          )}
+          style={{ transform: `translateX(${SLOTS.indexOf(view) * 100}%)` }}
+        />
+        <Tab
+          icon={MapIcon}
+          label="Map"
           active={view === 'map'}
           onClick={() => {
             selectEvent(null)
             setView('map')
           }}
-          icon={Map}
-          label="Map"
         />
-        <NavButton
-          active={view === 'friends'}
-          onClick={() => setView('friends')}
+        <Tab
           icon={Users}
           label="Friends"
+          active={view === 'friends'}
+          onClick={() => setView('friends')}
         />
-        {/* Center create action */}
-        <button
-          type="button"
-          onClick={() => setView('create')}
-          className="flex flex-col items-center gap-1"
-          aria-label="Create event"
-        >
-          <span
+        <div className="flex w-16 justify-center">
+          <Button
+            size="icon-lg"
+            aria-label="Plan with Orbit"
+            aria-current={onOrbit ? 'page' : undefined}
+            onClick={() => setView('create')}
             className={cn(
-              'grid size-11 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/25 transition',
-              view === 'create' && 'ring-2 ring-accent ring-offset-2 ring-offset-card',
+              'size-11 rounded-full shadow-lg shadow-primary/30 transition-transform duration-100 active:scale-95',
+              onOrbit && 'ring-2 ring-primary/40 ring-offset-2 ring-offset-card',
             )}
           >
-            {view === 'create' ? <Sparkles className="size-5" /> : <Plus className="size-5" />}
-          </span>
-          <span
-            className={cn(
-              'text-[10px] font-medium',
-              view === 'create' ? 'text-primary' : 'text-muted-foreground',
-            )}
-          >
-            Create
-          </span>
-        </button>
-        <NavButton
-          active={view === 'profile'}
-          onClick={() => setView('profile')}
+            <Sparkles />
+          </Button>
+        </div>
+        <Tab
           icon={User}
           label="You"
+          active={view === 'profile'}
+          onClick={() => setView('profile')}
         />
       </div>
     </nav>
   )
 }
 
-function NavButton({
-  active,
-  onClick,
+function Tab({
   icon: Icon,
   label,
+  active,
+  onClick,
 }: {
+  icon: LucideIcon
+  label: string
   active: boolean
   onClick: () => void
-  icon: typeof Map
-  label: string
 }) {
   return (
     <button
       type="button"
+      aria-current={active ? 'page' : undefined}
       onClick={onClick}
-      className="flex flex-col items-center gap-1 py-1.5"
+      className={cn(
+        'relative flex h-full w-16 flex-col items-center justify-center gap-0.5 rounded-full text-[10px] font-medium tracking-wide transition-[color,transform] duration-100 active:scale-95',
+        active ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
+      )}
     >
-      <Icon
-        className={cn(
-          'size-5 transition',
-          active ? 'text-primary' : 'text-muted-foreground',
-        )}
-      />
-      <span
-        className={cn(
-          'text-[10px] font-medium transition',
-          active ? 'text-primary' : 'text-muted-foreground',
-        )}
-      >
-        {label}
-      </span>
+      <Icon className="size-5" aria-hidden />
+      {label}
     </button>
   )
 }

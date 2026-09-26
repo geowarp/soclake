@@ -243,7 +243,7 @@ export function CreateScreen() {
         />
       )}
 
-      <div className="shrink-0 border-t border-border/60 bg-card/60 p-3 backdrop-blur">
+      <div className="shrink-0 border-t border-border/60 bg-card/60 px-3 pt-3 pb-(--nav-clearance) backdrop-blur">
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -460,7 +460,7 @@ function ManualForm({
           </Field>
         </div>
       </div>
-      <div className="border-t border-border/60 p-3">
+      <div className="border-t border-border/60 px-3 pt-3 pb-(--nav-clearance)">
         <Button
           disabled={!valid}
           onClick={() => onCreate(draft)}

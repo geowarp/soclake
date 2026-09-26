@@ -11,8 +11,8 @@ export function AppShell() {
   const { view } = useApp()
 
   return (
-    <div className="mx-auto flex h-[100dvh] w-full max-w-md flex-col overflow-hidden bg-background sm:my-4 sm:h-[calc(100dvh-2rem)] sm:rounded-[2rem] sm:border sm:border-border sm:shadow-2xl">
-      <main className="relative flex-1 overflow-hidden">
+    <div className="relative mx-auto flex h-[100dvh] w-full max-w-md flex-col overflow-hidden bg-background sm:my-4 sm:h-[calc(100dvh-2rem)] sm:rounded-[2rem] sm:border sm:border-border sm:shadow-2xl">
+      <main className="relative h-full overflow-hidden">
         {/* Map stays mounted to avoid re-initialization; others render on demand */}
         <div className={view === 'map' ? 'h-full' : 'hidden'}>
           <MapScreen />

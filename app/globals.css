@@ -125,39 +125,120 @@
   }
 }
 
-/* Leaflet dark map polish */
-.leaflet-container {
-  background: oklch(0.17 0.012 60);
+/* Floating tab island — geometry shared by the nav and the screens it floats over */
+:root {
+  --nav-island-h: 3.75rem;
+  --nav-inset: max(1rem, env(safe-area-inset-bottom));
+  --nav-clearance: calc(var(--nav-island-h) + var(--nav-inset) + 0.75rem);
+}
+.glass-island {
+  background: color-mix(in oklab, var(--card) 72%, transparent);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 12%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--foreground) 6%, transparent),
+    0 12px 32px -8px rgb(0 0 0 / 0.5);
+}
+.nav-indicator {
+  transition:
+    transform 420ms cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 200ms ease;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass-island {
+    background: var(--card);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-contrast: more) {
+  .glass-island {
+    background: var(--card);
+    box-shadow: 0 0 0 1px var(--foreground);
+  }
+}
+
+/* MapLibre markers */
+.orbit-map {
   font-family: var(--font-sans);
 }
-.leaflet-control-attribution {
-  background: rgba(0, 0, 0, 0.4) !important;
-  color: oklch(0.6 0.01 70) !important;
-  font-size: 9px !important;
+.orbit-map .maplibregl-ctrl-top-right {
+  /* keep attribution clear of the floating top bar */
+  top: 5.5rem;
 }
-.leaflet-control-attribution a {
-  color: oklch(0.75 0.05 70) !important;
+.orbit-pin-anchor {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
 }
-.leaflet-bar,
-.leaflet-control-zoom {
-  display: none !important;
+.orbit-pin {
+  position: relative;
+  transform-origin: bottom center;
+  transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+  animation: pin-pop 0.35s cubic-bezier(0.22, 1.2, 0.4, 1) backwards;
 }
-.friend-pin {
-  background: transparent;
-  border: none;
+.orbit-pin-anchor[data-selected] {
+  z-index: 1;
 }
-/* Turn the keyless OSM basemap into a sleek dark theme */
-.orbit-map .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.9)
-    saturate(0.55) grayscale(0.2);
+.orbit-pin-anchor[data-selected] .orbit-pin {
+  transform: scale(1.2);
 }
-.orbit-map .leaflet-control-attribution {
-  background: color-mix(in oklab, var(--card) 80%, transparent);
-  color: var(--muted-foreground);
-  border-top-left-radius: 6px;
+.orbit-pin-face {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 3px solid var(--pin-color);
+  overflow: hidden;
+  background: #111;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.35);
 }
-.orbit-map .leaflet-control-attribution a {
-  color: var(--accent);
+.orbit-pin-anchor[data-selected] .orbit-pin-face {
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--pin-color) 35%, transparent),
+    0 10px 22px rgb(0 0 0 / 0.45);
+}
+.orbit-pin-face img,
+.orbit-you-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.orbit-pin-tail {
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 12px;
+  height: 12px;
+  background: var(--pin-color);
+  border-radius: 2px;
+  transform: translateX(-50%) rotate(45deg);
+  z-index: -1;
+}
+.orbit-you {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+}
+.orbit-you .you-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: oklch(0.83 0.135 82);
+}
+.orbit-you-face {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid oklch(0.83 0.135 82);
+  overflow: hidden;
+  background: #111;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.35);
 }
 .you-pulse {
   animation: you-pulse 2.4s ease-out infinite;
@@ -174,9 +255,6 @@
   100% {
     opacity: 0;
   }
-}
-.pin-pop {
-  animation: pin-pop 0.35s cubic-bezier(0.22, 1.2, 0.4, 1) both;
 }
 @keyframes pin-pop {
   from {

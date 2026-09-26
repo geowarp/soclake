@@ -9,7 +9,7 @@ import { ProfileDialog } from '@/components/profile-dialog'
 import { CATEGORY_LABELS, tierForMinutes } from '@/lib/data'
 import type { AppEvent } from '@/lib/types'
 
-const LeafletMap = dynamic(() => import('@/components/map/leaflet-map'), {
+const MapLibreMap = dynamic(() => import('@/components/map/maplibre-map'), {
   ssr: false,
   loading: () => (
     <div className="grid h-full w-full place-items-center bg-background">
@@ -36,7 +36,7 @@ export function MapScreen() {
   return (
     <div className="relative h-full w-full overflow-hidden">
       <div className="absolute inset-0">
-        <LeafletMap
+        <MapLibreMap
           events={events}
           selectedEventId={selectedEventId}
           onSelect={selectEvent}
@@ -46,7 +46,7 @@ export function MapScreen() {
       </div>
 
       {/* Top bar */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[1000] p-4">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 p-4">
         <div className="pointer-events-auto flex items-center justify-between rounded-2xl border border-border/60 bg-card/80 px-4 py-2.5 backdrop-blur-md">
           <div>
             <h1 className="font-display text-lg font-semibold leading-none tracking-tight">
@@ -74,7 +74,7 @@ export function MapScreen() {
 
       {/* Bottom event carousel */}
       {!selectedEvent && (
-        <div className="absolute inset-x-0 bottom-0 z-[1000] pb-3">
+        <div className="absolute inset-x-0 bottom-(--nav-clearance) z-10">
           <div className="flex gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {events.map((evt) => (
               <EventCard key={evt.id} event={evt} onClick={() => selectEvent(evt.id)} />

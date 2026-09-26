@@ -52,7 +52,7 @@ export function FriendsScreen() {
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 pb-(--nav-clearance)">
         <div className="flex flex-col gap-2">
           {ranked.map((f) => {
             const user = getUser(f.friendId)
