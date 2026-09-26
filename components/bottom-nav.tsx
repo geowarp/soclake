@@ -21,7 +21,7 @@ export function BottomNav() {
         view !== 'map' && 'bg-linear-to-t from-background via-background/60 to-transparent pt-8',
       )}
     >
-      <div className="glass-island pointer-events-auto relative flex h-(--nav-island-h) items-center rounded-full p-1.5">
+      <div className="glass pointer-events-auto relative flex h-(--nav-island-h) items-center rounded-full p-1.5">
         <span
           aria-hidden
           className={cn(

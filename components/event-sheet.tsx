@@ -3,6 +3,7 @@
 import { CalendarDays, Check, Clock, MapPin, Users, X } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect } from 'react'
+import { AddFriendButton } from '@/components/add-friend-button'
 import { useApp } from '@/components/app-provider'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -19,7 +20,7 @@ export function EventSheet({
   onClose: () => void
   onViewProfile: (id: string) => void
 }) {
-  const { getUser, registerForEvent, isRegistered, currentUser } = useApp()
+  const { getUser, registerForEvent, isRegistered, currentUser, friendIds } = useApp()
 
   useEffect(() => {
     if (!event) return
@@ -37,6 +38,7 @@ export function EventSheet({
     .filter((u): u is NonNullable<typeof u> => !!u)
   const spotsLeft = event.capacity - event.attendeeIds.length
   const isHost = event.hostId === currentUser.id
+  const hostIsNew = !isHost && !friendIds.has(event.hostId)
 
   return (
     <div className="fixed inset-0 z-[1200] flex items-end justify-center sm:items-center">
@@ -77,20 +79,23 @@ export function EventSheet({
             {event.title}
           </h2>
 
-          {host && (
-            <button
-              onClick={() => onViewProfile(host.id)}
-              className="mt-3 flex items-center gap-2.5 rounded-full text-left"
-            >
-              <Avatar className="size-8">
-                <AvatarImage src={host.avatar || '/placeholder.svg'} alt={host.name} />
-                <AvatarFallback>{host.name[0]}</AvatarFallback>
-              </Avatar>
-              <span className="text-sm text-muted-foreground">
-                Hosted by <span className="font-medium text-foreground">{host.name}</span>
-              </span>
-            </button>
-          )}
+          {host ? (
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <button
+                onClick={() => onViewProfile(host.id)}
+                className="flex min-w-0 items-center gap-2.5 rounded-full text-left"
+              >
+                <Avatar className="size-8">
+                  <AvatarImage src={host.avatar || undefined} alt={host.name} />
+                  <AvatarFallback>{host.name[0]}</AvatarFallback>
+                </Avatar>
+                <span className="truncate text-sm text-muted-foreground">
+                  Hosted by <span className="font-medium text-foreground">{host.name}</span>
+                </span>
+              </button>
+              <AddFriendButton userId={host.id} />
+            </div>
+          ) : null}
 
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             {event.description}
@@ -121,7 +126,7 @@ export function EventSheet({
                   className="flex w-14 flex-col items-center gap-1"
                 >
                   <Avatar className="size-11 ring-2 ring-transparent transition hover:ring-accent">
-                    <AvatarImage src={a.avatar || '/placeholder.svg'} alt={a.name} />
+                    <AvatarImage src={a.avatar || undefined} alt={a.name} />
                     <AvatarFallback>{a.name[0]}</AvatarFallback>
                   </Avatar>
                   <span className="max-w-full truncate text-[11px] text-muted-foreground">
@@ -132,11 +137,13 @@ export function EventSheet({
             </div>
           </div>
 
-          {!isHost && !registered && attendees.length > 0 && (
+          {!isHost && !registered && attendees.length > 0 ? (
             <p className="mt-4 rounded-xl bg-accent/10 px-3 py-2 text-xs text-accent">
-              Join and you&apos;ll level up your friendship with everyone here.
+              {hostIsNew && host
+                ? `Join to meet ${host.name} in person — a first gathering is how every friendship starts.`
+                : 'Join and you\u2019ll level up your friendship with everyone here.'}
             </p>
-          )}
+          ) : null}
         </div>
 
         <div className="shrink-0 border-t border-border p-4">

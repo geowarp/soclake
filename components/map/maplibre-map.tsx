@@ -3,7 +3,7 @@
 import { AttributionControl, Map as MapLibre, Marker, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef } from 'react'
-import { HOME_LOCATION } from '@/lib/data'
+import { CURRENT_USER_ID, HOME_LOCATION } from '@/lib/data'
 import type { AppEvent, EventCategory, User } from '@/lib/types'
 
 // OpenFreeMap "Liberty": a keyless, standard-color OSM vector style (not satellite).
@@ -30,20 +30,31 @@ function avatarImage(src: string) {
 }
 
 /** MapLibre owns the outer element's transform, so visuals live on an inner node. */
-function friendPin(avatar: string, color: string, label: string) {
+function eventPin(host: User, color: string, label: string, isNew: boolean) {
   const el = document.createElement('button')
   el.type = 'button'
   el.className = 'orbit-pin-anchor'
-  el.setAttribute('aria-label', label)
+  el.setAttribute('aria-label', isNew ? `${label}, hosted by ${host.name} (not a friend yet)` : label)
   const pin = document.createElement('div')
   pin.className = 'orbit-pin'
   pin.style.setProperty('--pin-color', color)
   const face = document.createElement('div')
   face.className = 'orbit-pin-face'
-  face.append(avatarImage(avatar))
+  if (host.avatar) {
+    face.append(avatarImage(host.avatar))
+  } else {
+    face.classList.add('orbit-pin-initials')
+    face.textContent = host.name[0]
+  }
   const tail = document.createElement('div')
   tail.className = 'orbit-pin-tail'
   pin.append(face, tail)
+  if (isNew) {
+    const badge = document.createElement('div')
+    badge.className = 'orbit-pin-badge'
+    badge.textContent = '+'
+    pin.append(badge)
+  }
   el.append(pin)
   return el
 }
@@ -65,12 +76,14 @@ export default function MapLibreMap({
   selectedEventId,
   onSelect,
   getUser,
+  friendIds,
   youAvatar,
 }: {
   events: AppEvent[]
   selectedEventId: string | null
   onSelect: (id: string) => void
   getUser: (id: string) => User | undefined
+  friendIds: Set<string>
   youAvatar: string
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -91,8 +104,8 @@ export default function MapLibreMap({
       zoom: 13,
       attributionControl: false,
     })
-    // Top-right keeps the required attribution clear of the floating island.
-    map.addControl(new AttributionControl({ compact: true }), 'top-right')
+    // Top-left keeps the required attribution clear of the floating chrome.
+    map.addControl(new AttributionControl({ compact: true }), 'top-left')
     mapRef.current = map
     return () => {
       map.remove()
@@ -119,7 +132,8 @@ export default function MapLibreMap({
     for (const evt of events) {
       const host = getUser(evt.hostId)
       if (!host || !Number.isFinite(evt.lat) || !Number.isFinite(evt.lng)) continue
-      const el = friendPin(host.avatar, CATEGORY_COLOR[evt.category], evt.title)
+      const isNew = host.id !== CURRENT_USER_ID && !friendIds.has(host.id)
+      const el = eventPin(host, CATEGORY_COLOR[evt.category], evt.title, isNew)
       el.addEventListener('click', (e) => {
         e.stopPropagation()
         onSelectRef.current(evt.id)
@@ -131,7 +145,7 @@ export default function MapLibreMap({
       for (const m of markers) m.remove()
       pins.clear()
     }
-  }, [events, getUser])
+  }, [events, getUser, friendIds])
 
   // Highlight by toggling an attribute instead of rebuilding markers.
   useEffect(() => {

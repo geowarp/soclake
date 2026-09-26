@@ -38,6 +38,11 @@ type AppState = {
   users: User[]
   events: AppEvent[]
   friendships: Friendship[]
+  /** ids of people you're friends with, for O(1) lookups */
+  friendIds: Set<string>
+  /** ids of people you've sent a friend request to */
+  requestedIds: Set<string>
+  requestFriend: (id: string) => void
   view: View
   setView: (v: View) => void
   selectedEventId: string | null
@@ -66,6 +71,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [view, setView] = useState<View>('map')
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [createdCount, setCreatedCount] = useState(0)
+  const [requestedIds, setRequestedIds] = useState<Set<string>>(() => new Set())
+
+  const friendIds = useMemo(
+    () => new Set(friendships.map((f) => f.friendId)),
+    [friendships],
+  )
+
+  const requestFriend = useCallback((id: string) => {
+    setRequestedIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)))
+  }, [])
 
   const currentUser = USERS_BY_ID[CURRENT_USER_ID]
 
@@ -129,6 +144,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       users: USERS,
       events,
       friendships,
+      friendIds,
+      requestedIds,
+      requestFriend,
       view,
       setView,
       selectedEventId,
@@ -142,6 +160,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       currentUser,
       events,
       friendships,
+      friendIds,
+      requestedIds,
+      requestFriend,
       view,
       selectedEventId,
       selectEvent,

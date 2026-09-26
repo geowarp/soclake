@@ -125,13 +125,13 @@
   }
 }
 
-/* Floating tab island — geometry shared by the nav and the screens it floats over */
+/* Floating chrome: tab island geometry + the shared translucent material */
 :root {
   --nav-island-h: 3.75rem;
   --nav-inset: max(1rem, env(safe-area-inset-bottom));
   --nav-clearance: calc(var(--nav-island-h) + var(--nav-inset) + 0.75rem);
 }
-.glass-island {
+.glass {
   background: color-mix(in oklab, var(--card) 72%, transparent);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -146,14 +146,14 @@
     opacity 200ms ease;
 }
 @media (prefers-reduced-transparency: reduce) {
-  .glass-island {
+  .glass {
     background: var(--card);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 }
 @media (prefers-contrast: more) {
-  .glass-island {
+  .glass {
     background: var(--card);
     box-shadow: 0 0 0 1px var(--foreground);
   }
@@ -163,9 +163,10 @@
 .orbit-map {
   font-family: var(--font-sans);
 }
-.orbit-map .maplibregl-ctrl-top-right {
-  /* keep attribution clear of the floating top bar */
+.orbit-map .maplibregl-ctrl-top-left {
+  /* below the floating banner, wrapping short of the view toggle on the right */
   top: 5.5rem;
+  max-width: calc(100% - 8rem);
 }
 .orbit-pin-anchor {
   cursor: pointer;
@@ -205,6 +206,32 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+.orbit-pin-initials {
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--pin-color) 30%, var(--card));
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+/* Marks a host you're not friends with yet */
+.orbit-pin-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--card);
 }
 .orbit-pin-tail {
   position: absolute;

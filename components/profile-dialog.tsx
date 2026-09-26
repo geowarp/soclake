@@ -1,6 +1,7 @@
 'use client'
 
 import { Sparkles } from 'lucide-react'
+import { AddFriendButton } from '@/components/add-friend-button'
 import { useApp } from '@/components/app-provider'
 import { FriendProgress } from '@/components/friendship'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -32,7 +33,7 @@ export function ProfileDialog({
             <div className="relative h-24 bg-gradient-to-br from-primary/30 via-accent/20 to-transparent">
               <div className="absolute -bottom-9 left-5">
                 <Avatar className="size-20 border-4 border-card shadow-lg">
-                  <AvatarImage src={user.avatar || '/placeholder.svg'} alt={user.name} />
+                  <AvatarImage src={user.avatar || undefined} alt={user.name} />
                   <AvatarFallback>{user.name[0]}</AvatarFallback>
                 </Avatar>
               </div>
@@ -61,6 +62,8 @@ export function ProfileDialog({
                   </Badge>
                 ))}
               </div>
+
+              <AddFriendButton userId={user.id} className="mt-5 w-full" />
 
               {!isYou && friendship && (
                 <div className="mt-5 rounded-2xl bg-secondary/50 p-4">
