@@ -66,18 +66,27 @@ export function MapScreen() {
       </div>
 
       {layout === 'list' ? (
-        // Top padding clears the banner (3.75rem) and view toggle (2.75rem) plus gaps.
-        <div className="animate-fade-in absolute inset-0 z-10 overflow-y-auto bg-background px-4 pt-36 pb-(--nav-clearance)">
+        // Starts level with the view toggle; the large title fills the space beside
+        // it so no row sits under the toggle at rest.
+        <div className="animate-fade-in absolute inset-0 z-10 overflow-y-auto bg-background px-4 pt-27 pb-(--nav-clearance)">
+          <div className="mb-3 flex min-h-25 flex-col gap-1 pr-16">
+            <h2 className="font-display text-3xl leading-none font-semibold tracking-tight">
+              Gatherings
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {audience === 'public' ? 'Everyone nearby' : 'From your friends'}
+            </p>
+          </div>
           <GatheringList events={visibleEvents} onSelect={selectEvent} />
         </div>
       ) : null}
 
-      {/* Floating chrome */}
+      {/* Floating banner */}
       <div
         className={
           layout === 'list'
-            ? 'pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col items-end gap-3 bg-linear-to-b from-background via-background/90 to-transparent p-4'
-            : 'pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col items-end gap-3 p-4'
+            ? 'pointer-events-none absolute inset-x-0 top-0 z-20 bg-linear-to-b from-background via-background/90 to-transparent p-4'
+            : 'pointer-events-none absolute inset-x-0 top-0 z-20 p-4'
         }
       >
         <header className="glass pointer-events-auto flex h-15 w-full items-center justify-between gap-3 rounded-2xl pr-2.5 pl-4">
@@ -109,24 +118,34 @@ export function MapScreen() {
             </ToggleGroupItem>
           </ToggleGroup>
         </header>
-
-        <ToggleGroup
-          aria-label="View as"
-          spacing={1}
-          value={[layout]}
-          onValueChange={(v) => {
-            if (v[0]) setLayout(v[0] as Layout)
-          }}
-          className="glass pointer-events-auto rounded-full p-1"
-        >
-          <ToggleGroupItem value="map" aria-label="Map view" className="size-9 rounded-full">
-            <MapIcon />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="list" aria-label="List view" className="size-9 rounded-full">
-            <ListIcon />
-          </ToggleGroupItem>
-        </ToggleGroup>
       </div>
+
+      {/* View toggle: top-right, 2rem below the banner (1rem inset + 3.75rem
+          banner + 2rem) so taps can't land on the banner by mistake. */}
+      <ToggleGroup
+        aria-label="View as"
+        orientation="vertical"
+        spacing={1}
+        value={[layout]}
+        onValueChange={(v) => {
+          if (v[0]) setLayout(v[0] as Layout)
+        }}
+        className="glass absolute top-27 right-4 z-20 rounded-full p-1"
+      >
+        <ToggleGroupItem value="map" aria-label="Map view" className="size-11 rounded-full">
+          <MapIcon />
+        </ToggleGroupItem>
+        <ToggleGroupItem value="list" aria-label="List view" className="size-11 rounded-full">
+          <ListIcon />
+        </ToggleGroupItem>
+      </ToggleGroup>
+
+      {/* Required map-data credit: faint text centred in the gap under the island. */}
+      {layout === 'map' ? (
+        <p className="pointer-events-none absolute inset-x-0 bottom-[calc((var(--nav-inset)-0.5rem)/2)] z-10 text-center text-[8px] leading-none text-muted-foreground/60 select-none">
+          © OpenMapTiles © OpenStreetMap
+        </p>
+      ) : null}
 
       {/* Bottom event carousel (map view only) */}
       {layout === 'map' && !selectedEvent ? (

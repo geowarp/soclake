@@ -163,11 +163,6 @@
 .orbit-map {
   font-family: var(--font-sans);
 }
-.orbit-map .maplibregl-ctrl-top-left {
-  /* below the floating banner, wrapping short of the view toggle on the right */
-  top: 5.5rem;
-  max-width: calc(100% - 8rem);
-}
 .orbit-pin-anchor {
   cursor: pointer;
   background: none;

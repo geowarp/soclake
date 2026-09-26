@@ -1,6 +1,6 @@
 'use client'
 
-import { AttributionControl, Map as MapLibre, Marker, setWorkerUrl } from 'maplibre-gl'
+import { Map as MapLibre, Marker, setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef } from 'react'
 import { CURRENT_USER_ID, HOME_LOCATION } from '@/lib/data'
@@ -102,10 +102,9 @@ export default function MapLibreMap({
       style: MAP_STYLE,
       center: [HOME_LOCATION.lng, HOME_LOCATION.lat],
       zoom: 13,
+      // The required credit is rendered by MapScreen as quiet text instead.
       attributionControl: false,
     })
-    // Top-left keeps the required attribution clear of the floating chrome.
-    map.addControl(new AttributionControl({ compact: true }), 'top-left')
     mapRef.current = map
     return () => {
       map.remove()
